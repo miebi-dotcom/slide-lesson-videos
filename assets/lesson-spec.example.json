@@ -1,0 +1,155 @@
+{
+ "_note": "Invented example for the file layout only. Ids (mainId, presets, bgIds, customBaseId, wipe) belong to the animator's project: read yours with probe_project.jsx and inspect_presets.jsx. Colours would come from pdf_palette.py.",
+ "code": "COURSE101_L01",
+ "course": "Introduction to Sustainable Gardening",
+ "mainId": 100,
+ "work": "D:/path/to/lesson folder/_build",
+ "videoDir": "D:/path/to/animator videos/",
+ "presets": {
+  "intro": 11,
+  "outro": 12,
+  "outline": 13,
+  "blue": 14,
+  "darkcard": 15
+ },
+ "customBaseId": 15,
+ "bgIds": {
+  "red": 20,
+  "beige": 21
+ },
+ "bgNames": {
+  "red": "BG Red",
+  "beige": "BG Beige"
+ },
+ "wipe": {
+  "bandId": 30,
+  "matteId": 31
+ },
+ "audioPrefix": "Background Music",
+ "textColors": {
+  "navy": [
+   10,
+   49,
+   79
+  ],
+  "white": [
+   255,
+   255,
+   255
+  ]
+ },
+ "cardColor": [
+  10,
+  49,
+  79
+ ],
+ "customTextColor": "white",
+ "trackColor": [
+  228,
+  60,
+  49
+ ],
+ "boldFont": "Manrope-ExtraBold",
+ "text": {
+  "proper_nouns": [
+   "Paris Agreement"
+  ],
+  "acronyms": [
+   "NASA"
+  ],
+  "cap_after_colon": false
+ },
+ "custom": {
+  "4": null
+ },
+ "intro": {
+  "title": "Introduction|to sustainable|gardening",
+  "video": "slide 1.mp4",
+  "bg": "red"
+ },
+ "outro": {
+  "title": "Thank you",
+  "bg": "red"
+ },
+ "pages": {
+  "2": {
+   "title": "WHAT IS HEALTHY SOIL?",
+   "bullets": [
+    "Soil that supports plants, water and wildlife",
+    "Rich in organic matter",
+    "Holds water without flooding",
+    "Home to billions of living organisms"
+   ],
+   "preset": "outline",
+   "bg": "beige",
+   "textColor": "navy",
+   "video": "Slide 2.mp4"
+  },
+  "3": {
+   "title": "TYPES OF COMPOST",
+   "header": "Three common methods:",
+   "bullets": [
+    "Hot composting: Fast, needs turning",
+    "Cold composting: Slow, low effort",
+    "Worm composting: Works indoors"
+   ],
+   "preset": "darkcard",
+   "bg": "red",
+   "cardFill": [
+    10,
+    49,
+    79
+   ],
+   "textColor": "white",
+   "video": "Slide 3.mp4"
+  },
+  "4": {
+   "title": "GARDEN ROLES",
+   "kind": "four",
+   "bg": "red",
+   "textColor": "white",
+   "bullets": [],
+   "cards": [
+    {
+     "num": "01",
+     "title": "Planner",
+     "text": "Chooses the layout and the plants"
+    },
+    {
+     "num": "02",
+     "title": "Grower",
+     "text": "Sows, waters and weeds"
+    },
+    {
+     "num": "03",
+     "title": "Harvester",
+     "text": "Picks and stores the crops"
+    },
+    {
+     "num": "04",
+     "title": "Composter",
+     "text": "Turns waste into new soil"
+    }
+   ]
+  },
+  "5": {
+   "title": "CASE STUDY — THE PARIS AGREEMENT",
+   "header": "A real-world example of shared goals",
+   "bullets": [
+    "Problem: Rising temperatures",
+    "Plan: Countries set their own targets",
+    "Review: Progress is checked every five years",
+    "~A model for shared action"
+   ],
+   "preset": "blue",
+   "bg": "beige",
+   "cardFill": [
+    255,
+    255,
+    255
+   ],
+   "textColor": "navy",
+   "video": "Slide 5.mp4"
+  }
+ }
+}
