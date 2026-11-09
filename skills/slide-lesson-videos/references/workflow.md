@@ -46,7 +46,8 @@ All commands run from the lesson folder. `K` = `${CLAUDE_SKILL_DIR}/scripts`. `A
 - `fix_textcolor.jsx` with `colors.json`: text, header and arrows take the PDF colour.
 - **The client's PDF changed after the build?** Do not rebuild. Run `pdf_palette.py` on the new PDF, diff it against the old (text per page, embedded-image hashes per page, palette per page), then `recolor.jsx` (card fills, text, arrows, highlight bars, and switching off the card's progress line) and `apply_text.jsx` + `style_scenes.jsx` with `refitOnly` (changed wording), and check gate 2 and gate 3. Only a changed picture or layout needs a rebuild of that slide.
 - `nofade.jsx` (no data): removes the template's exit fade so titles, icons and cards stay until the wipe has covered them.
-- Optional polish asked for on an earlier lesson (do them only when the PDF differs from the template): `staticline.jsx` (switch off the moving progress bar; leave one static rule that contrasts with the background), `headericon.jsx` + `headericon_fix.jsx` (swap the template's header icon for the PDF's: the shapes in the script are that lesson's briefcase-with-plus, redraw them for another icon), `playbtn.jsx` `{"scene","disc","glyph","ring"}` (the intro play button must contrast with the intro background).
+- **Mandatory, every lesson:** `staticline.jsx` (data `{"project": ...}`; switches off the red moving progress bar over the header line) then `fix_rule.jsx` (rule colour from each slide's background: white on navy, navy on beige). The user does not want the red line in any video. Check a zoomed header on a beige and a navy slide.
+- Optional polish asked for on an earlier lesson (do them only when the PDF differs from the template): `headericon.jsx` + `headericon_fix.jsx` (swap the template's header icon for the PDF's: the shapes in the script are that lesson's briefcase-with-plus, redraw them for another icon), `playbtn.jsx` `{"scene","disc","glyph","ring"}` (the intro play button must contrast with the intro background).
 
 ## Step 6: Wipes and music
 - `place_wipes.jsx` with `wipes.json`: one wipe per cut, stacked as the template's demo comp does (band, matte hidden, incoming slide with an alpha matte; the outgoing slide runs 1.1 s past the next start). Needs `spec.wipe.bandId` and `matteId` (probe: `transitionComps`).
@@ -64,7 +65,7 @@ Fix every error, rerun `precheck.jsx`, repeat until clean. Then run `qc_frames.j
 Render one frame of a light slide, a dark slide and the outro, crop the header (top left, the icon and the subtopic line) and enlarge it. Check: the icon is the lesson's own (compare with the PDF page render), it sits level with the subtopic text and is neither tiny nor blurry, it is the right colour for its background, and the subtopic line reads exactly as the PDF has it.
 
 ## Rerun order
-`extract_icon` -> `plan_lesson` -> (`setup_bg`) -> `build_scenes` -> `style_scenes` -> `build_custom` -> `fix_still` / `fix_intro` -> `header_icon` -> `fix_durations` -> `fix_highlights` -> `fix_textcolor` -> `nofade` -> (`staticline`, `headericon`, `playbtn`) -> `place_wipes` -> `music` -> gate 2 -> gate 3.
+`extract_icon` -> `plan_lesson` -> (`setup_bg`) -> `build_scenes` -> `style_scenes` -> `build_custom` -> `fix_still` / `fix_intro` -> `header_icon` -> `fix_durations` -> `fix_highlights` -> `fix_textcolor` -> `nofade` -> `staticline` -> `fix_rule` -> (`headericon`, `playbtn`) -> `place_wipes` -> `music` -> gate 2 -> gate 3.
 `build_scenes` and `build_custom` replace by scene name, which discards styling on those scenes: after rebuilding a scene, rerun everything from `style_scenes` down for it. `place_wipes` removes and rebuilds all wipes, so it is always safe to rerun and must be rerun after any start or length change.
 
 ## Covering template gaps

@@ -106,7 +106,12 @@ def main(argv):
                 continue
             sl = spec.get("slots", {})
             if s["name"] == "S01 Intro":
-                kind = "topic" if slot == str(sl.get("intro", {}).get("title", 7)) else "title"
+                if slot == str(sl.get("intro", {}).get("title", 7)):
+                    kind = "topic"
+                elif slot == str(sl.get("intro", {}).get("course", 6)):
+                    kind = "keep"             # the subtopic line is never touched
+                else:
+                    kind = "title"
             elif s["name"] == "S20 Thank you":
                 kind = "title"
             elif slot == str(sl.get("title", 24)):

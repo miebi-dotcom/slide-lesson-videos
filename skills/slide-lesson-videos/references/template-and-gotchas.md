@@ -37,6 +37,9 @@ Per cut, top to bottom in the main comp: wipe band, wipe matte (hidden), the inc
 | Extra bullets still follow B5 | expression names not replaced (quoting) | replace the bare name |
 | Header icon invisible after replacing | new shape layers centre in the comp; the template's icon sat at 0,0 | set Position [0,0] (`headericon_fix.jsx`) |
 | Intro title clipped by the picture | one long line | more lines, 92 pt |
+| Red line moving along the header rule | the template's "Progress" shape in `Header Line`; the user does not want it in any video | `staticline.jsx`, then `fix_rule.jsx` (rerun after any scene rebuild) |
+| Header rule white on beige / invisible navy on navy | background swapped but the rule kept the preset's colour | `fix_rule.jsx` |
+| Faint text in the logo, or title/course name invisible | background swapped but logo comp, title and course colours stayed the preset's | swap the nested logo (`Logo - on beige` / `on navy`) and set title and course colours by background |
 | Card fading in over red looks purple | the template's rise over a coloured background | left as is |
 | Highlight covers one line of a two-line bullet | fixed 73 px bar | size from measured text height |
 | Music level read -48 dB after a rerun | read the level while the fade keys existed | use a fixed base of 0 dB (the script does) |

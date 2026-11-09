@@ -28,7 +28,7 @@ The JSON file arrives in the script as `DATA`; the result is a `toSource` object
 - [ ] 2. Write lesson.json (text from the PDF, colours from the PDF, presets from the template)
 - [ ] 3. Plan: plan_lesson.py -> text rules applied -> GATE 1 (precheck_plan.py) until 0 errors
 - [ ] 4. Build 2-3 slides, QC them, then the rest (build_scenes, style_scenes)
-- [ ] 5. Slides with no picture slot, intro, outro, consistency fixes
+- [ ] 5. Slides with no picture slot, intro, outro, consistency fixes; REMOVE THE RED HEADER-LINE BAR (staticline.jsx + fix_rule.jsx), set title/course/logo/rule colours by background
 - [ ] 6. Wipes between slides, music
 - [ ] 7. GATE 2 (precheck.jsx + precheck_ae.py) until 0 errors, then GATE 3 (QC frames, every slide)
 - [ ] 7b. LOOK AT THE HEADER one last time: the lesson's own icon, and the subtopic line exactly as the PDF has it
@@ -61,6 +61,13 @@ The header of every slide has the publisher's logo at the right (leave it) and, 
 - The subtopic line beside the header icon (verbatim).
 - The lesson topic's capitals: it stays in CAPITALS (only British spelling applies).
 - The publisher's logo, and the wording of the slides (the rules fix spelling, case and punctuation only; suspected mistakes in the source are flagged to the author, never silently changed).
+
+## Header line: no red progress bar (mandatory, user decision)
+The template's header line is a static rule with a **moving red progress bar** drawn over it. It does nothing useful in a lesson video, so **it must not be in the finished video, on any slide**. Every build:
+1. Run `staticline.jsx` (switches off every "Progress..." shape of each `Header Line` layer, leaving the static rule). Data file: just `{"project": "<file>.aep"}`.
+2. Run `fix_rule.jsx` with `{"project", "scenes": [{"name", "bg": "navy"|"beige"}]}` so the remaining rule is **white on navy, navy on beige**. Slides whose background was swapped otherwise keep the preset's rule colour (white rule on beige, or an invisible navy rule on navy).
+3. Zoom into the header of one beige and one navy slide: one thin line, no red on it. (The progress line inside the card is a separate element.)
+Rerun both after any scene rebuild (`build_scenes` brings the red bar back). Likewise after a background swap set the title, course-name and logo (`Logo - on navy`/`on beige`) by background.
 
 ## House text rules (applied automatically, checked at every gate)
 1. **British English.** Any American spelling is changed (organize, color, center, analyze, behavior, defense...). Words whose spelling depends on meaning (program/programme, license/licence, disk/disc, ton/tonne) are flagged for a person, not changed.
