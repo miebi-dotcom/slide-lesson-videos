@@ -1,0 +1,15 @@
+{
+  "name": "slide-lesson-videos",
+  "owner": { "name": "miebi-dotcom" },
+  "metadata": { "description": "Claude Code skill for building slide-style lesson videos in After Effects" },
+  "plugins": [
+    {
+      "name": "slide-lesson-videos",
+      "source": "./",
+      "description": "Builds slide-style lesson videos in Adobe After Effects from a PDF deck and an animator's template: colours read from the PDF, British English / sentence case / punctuation rules, and built-in QA gates.",
+      "version": "1.0.0",
+      "license": "MIT",
+      "keywords": ["after-effects", "video", "lesson", "slides", "qa"]
+    }
+  ]
+}
