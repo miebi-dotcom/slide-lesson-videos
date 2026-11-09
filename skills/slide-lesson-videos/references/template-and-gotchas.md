@@ -1,4 +1,4 @@
-# The template, and the traps found on earlier lessons
+# The template, and traps found on earlier lessons
 
 ## Contents
 - How the animator's template is built

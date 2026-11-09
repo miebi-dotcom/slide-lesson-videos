@@ -6,7 +6,8 @@
 | Key | Meaning |
 |---|---|
 | `code` | Lesson code, used in folder names |
-| `course` | Course name shown on every slide (the text rules run on it) |
+| `project` | File name of the After Effects project (for example `COURSE101_L01.aep`). It is written into every data file, and `ae_run.ps1` refuses to run a script when a different project is open. Always set it |
+| `course` | The subtopic line shown beside the header icon, copied from the PDF exactly as it is written. The text rules never touch it |
 | `mainId` | Id of the main comp (from `probe_project.jsx`) |
 | `work` | The `_build` folder; every generated file goes here |
 | `videoDir` | Folder holding the animator's videos |

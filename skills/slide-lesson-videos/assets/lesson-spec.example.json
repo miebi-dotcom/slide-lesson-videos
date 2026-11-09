@@ -1,5 +1,6 @@
 {
  "_note": "Invented example for the file layout only. Ids (mainId, presets, bgIds, customBaseId, wipe) belong to the animator's project: read yours with probe_project.jsx and inspect_presets.jsx. Colours would come from pdf_palette.py.",
+ "project": "COURSE101_L01.aep",
  "code": "COURSE101_L01",
  "course": "Introduction to Sustainable Gardening",
  "mainId": 100,

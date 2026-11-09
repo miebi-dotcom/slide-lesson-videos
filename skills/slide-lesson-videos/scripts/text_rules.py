@@ -8,6 +8,8 @@ Used three ways:
      in After Effects); lists every layer whose text breaks a rule.  Exit code 1 when anything is found.
 
 Block kinds (the rules differ):
+  keep    the course / subtopic line beside the header icon: left EXACTLY as the PDF has it (no spelling, case or punctuation
+          change at all). fix() returns it unchanged.
   topic   the lesson topic at the top of a slide, and the intro title: stays in CAPITALS (British spelling only), NO closing full stop
   title   course name, outro line, card titles: sentence case, NO closing full stop (a "?" is kept)
   header  card header / lead-in line ("A good action plan includes:"): sentence case, ends in . ? ! or :
@@ -16,7 +18,7 @@ Block kinds (the rules differ):
 Sentence case here is strict: only the first letter of a sentence is a capital. A word keeps its capital only when it is
   - a protected proper noun or phrase (cfg["proper_nouns"], e.g. "Paris Agreement", "World Bank"),
   - an acronym (cfg["acronyms"], an all-caps word in mixed text, or an all-caps word in brackets such as "(NASA)"),
-  - a word with a capital inside it (NASA, pH, iPhone), or the word "I".
+  - a word with a capital inside it (pH, iPhone, mRNA), or the word "I".
 The letter after a colon is lower case unless cfg["cap_after_colon"] is true.  Text typed in capitals is lower-cased first.
 """
 import json
@@ -270,13 +272,15 @@ def end_punctuation(text, kind):
     return core + closers + "." if closers else core + "."
 
 
-KINDS = ("topic", "title", "header", "bullet")
+KINDS = ("keep", "topic", "title", "header", "bullet")
 
 
 def fix(text, kind="bullet", cfg=None):
     """Apply all rules to one block of text. Returns (new_text, changes)."""
     cfg = cfg or {}
     changes = []
+    if kind == "keep":                       # never touched: the subtopic line is the client's own wording and styling
+        return text, changes
     t = tidy_spacing(text)
     t = british(t, changes, cfg.get("keep_spelling", []))
     if kind == "topic":                      # the topic is shown in capitals: only spelling and the closing full stop are touched
@@ -285,7 +289,7 @@ def fix(text, kind="bullet", cfg=None):
             changes.append(("caps", t, s))
         p = end_punctuation(s, "title")
         if p != s:
-            changes.append(("punctuation", "..." + s[-14:], "..." + p[-14:]))
+            changes.append(("punctuation", s[-12:], p[-12:]))
         return p, changes
     s = sentence_case(t, cfg)
     if s != t:
@@ -293,7 +297,7 @@ def fix(text, kind="bullet", cfg=None):
     t = s
     p = end_punctuation(t, kind)
     if p != t:
-        changes.append(("punctuation", "..." + t[-14:], "..." + p[-14:]))
+        changes.append(("punctuation", t[-12:], p[-12:]))
     t = p
     if text.strip() != t and not changes:
         changes.append(("spacing", text, t))

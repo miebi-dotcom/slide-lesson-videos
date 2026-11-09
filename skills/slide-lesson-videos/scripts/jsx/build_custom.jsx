@@ -116,18 +116,22 @@ function twoCards(c, S) {
     }
 }
 function fourCards(c, S) {
-    var cw = 392, ch = 560, y0 = 440, gap = 32, x0 = 128;
-    for (var i = 0; i < 4; i++) {
+    var n = S.cards.length, gap = n > 4 ? 24 : 32, x0 = 128, cw = (1664 - gap * (n - 1)) / n, ch = 560, y0 = 440;
+    var pad = n > 4 ? 28 : 40, tsize = n > 4 ? 34 : 38;
+    for (var i = 0; i < n; i++) {
         var card = S.cards[i], x = x0 + i * (cw + gap), pre = S.name.substr(0, 3) + " Card " + (i + 1);
         addCard(c, pre, x, y0, cw, ch, BLUE, card.t);
-        var num = addText(c, pre + " Number", card.num, "Afacad-SemiBold", 150, x + 40, y0 + 18, cw - 80, card.t + 0.45, 24);
+        var num = addText(c, pre + " Number", card.num, "Afacad-SemiBold", 150, x + pad, y0 + 18, cw - 2 * pad, card.t + 0.45, 24);
         var y = y0 + 220;
         if (card.title) {
-            var tt = addText(c, pre + " Title", card.title, "Manrope-Bold", 38, x + 40, y, cw - 80, card.t + 0.7);
+            var tt = addText(c, pre + " Title", card.title, "Manrope-Bold", card.tsize || tsize, x + pad, y, cw - 2 * pad, card.t + 0.7);
             y += textH(tt) + 14;
         }
-        var body = addText(c, pre + " Text", card.text, "Manrope-Regular", card.size || 30, x + 40, y, cw - 80, card.t + (card.title ? 0.9 : 0.7));
-        R.done.push(S.name + " card " + (i + 1) + " text ends y " + Math.round(y + textH(body)));
+        if (card.text) {
+            var body = addText(c, pre + " Text", card.text, "Manrope-Regular", card.size || 30, x + pad, y, cw - 2 * pad, card.t + (card.title ? 0.9 : 0.7));
+            y += textH(body);
+        }
+        R.done.push(S.name + " card " + (i + 1) + " text ends y " + Math.round(y));
     }
 }
 

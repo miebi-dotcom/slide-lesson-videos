@@ -14,6 +14,8 @@ A slide lesson is a PDF deck rebuilt as animated slides in the animator's After 
 - Run Python scripts that read the PDF **without** `-I` (isolated mode hides user-installed pymupdf). `text_rules.py` and the planners have no dependencies.
 
 ## Running After Effects scripts
+**Check which project is open first.** People keep several lessons open, and a script that writes to the wrong one changes someone else's work (this happened once: a script landed in another lesson's intro and had to be undone). Look at the After Effects title bar, set `project` in `lesson.json`, and put `"project": "<file>.aep"` in every data file you write by hand. The runner refuses to run when that project is not the one open.
+
 ```
 powershell -NoProfile -ExecutionPolicy Bypass -File ${CLAUDE_SKILL_DIR}/scripts/ae_run.ps1 -Script ${CLAUDE_SKILL_DIR}/scripts/jsx/<name>.jsx -DataFile <input.json> [-Timeout 300]
 ```
@@ -22,13 +24,14 @@ The JSON file arrives in the script as `DATA`; the result is a `toSource` object
 ## The pipeline
 ```
 - [ ] 0. Inputs: PDF, template, images/videos, audio. Ask what the audio is. Probe the template.
-- [ ] 1. Read the PDF: text, page renders, and COLOURS (pdf_palette.py)
+- [ ] 1. Read the PDF: text, page renders, COLOURS (pdf_palette.py) and the header ICON (extract_icon.py)
 - [ ] 2. Write lesson.json (text from the PDF, colours from the PDF, presets from the template)
 - [ ] 3. Plan: plan_lesson.py -> text rules applied -> GATE 1 (precheck_plan.py) until 0 errors
 - [ ] 4. Build 2-3 slides, QC them, then the rest (build_scenes, style_scenes)
 - [ ] 5. Slides with no picture slot, intro, outro, consistency fixes
 - [ ] 6. Wipes between slides, music
 - [ ] 7. GATE 2 (precheck.jsx + precheck_ae.py) until 0 errors, then GATE 3 (QC frames, every slide)
+- [ ] 7b. LOOK AT THE HEADER one last time: the lesson's own icon, and the subtopic line exactly as the PDF has it
 - [ ] 8. Report
 ```
 Full commands, data shapes and the rerun order are in [references/workflow.md](references/workflow.md). Read it before step 0.
@@ -38,7 +41,8 @@ Full commands, data shapes and the rerun order are in [references/workflow.md](r
 2. **Ask what the audio file is** before doing anything with it. On an earlier lesson the file was soft background music; transcribing it produced invented speech and wasted a long detour. Music is a bed (fade in/out); narration would be a different job.
 3. `python ${CLAUDE_SKILL_DIR}/scripts/extract_slides.py <pdf> _build/slides` then read `slides.md` and look at `page_XX.png`. Exports drop letters ("a ected" for "affected"): fix them against the renders.
 4. `python ${CLAUDE_SKILL_DIR}/scripts/pdf_palette.py <pdf> _build` gives each page's background, card fill and text colour. **Colours come from the PDF, never from the template and never from memory.** Pages alternate between two or three backgrounds; the template may have a comp for only some of them (build the missing ones with `setup_bg.jsx`).
-5. Probe the template (`probe_project.jsx`, `inspect_presets.jsx`) and note its gaps against the deck: a layout the deck uses that the template lacks (two cards, four numbered cards, no-picture slides, a background colour), more bullets than slots. Decide how each is covered (workflow.md) or ask.
+5. `python ${CLAUDE_SKILL_DIR}/scripts/extract_icon.py <pdf> _build/icons` saves the **lesson icon** from the PDF: the small icon beside the subtopic line in the header (top left, not the publisher's logo at top right). Every lesson has its own, and the template only carries a stand-in, so it must be replaced on every build (see "Header icon and subtopic line" below).
+6. Probe the template (`probe_project.jsx`, `inspect_presets.jsx`) and note its gaps against the deck: a layout the deck uses that the template lacks (two cards, four numbered cards, no-picture slides, a background colour), more bullets than slots. Decide how each is covered (workflow.md) or ask.
 
 ### Step 2-3: the spec and the first gate
 Fill `lesson.json` from [references/spec-format.md](references/spec-format.md) (a complete example is in `assets/lesson-spec.example.json`). Then:
@@ -48,11 +52,21 @@ python ${CLAUDE_SKILL_DIR}/scripts/precheck_plan.py _build/lesson.json --slides 
 ```
 `plan_lesson.py` runs every block of text through the house text rules and writes `text_changes.md`: **read it and show the user the edits that need judgement** (proper nouns, quotations, "program"). Do not build until `precheck_plan.py` reports 0 errors, and say what each warning means for the slides.
 
+## Header icon and subtopic line (check these at the end of every build)
+The header of every slide has the publisher's logo at the right (leave it) and, at the left, a **small lesson icon followed by the subtopic line** (the course or topic name, e.g. "Introduction to Sustainable Gardening").
+- **The icon is the lesson's own.** Whatever icon the template shows is a stand-in from another lesson. After building, run `header_icon.jsx` with the PNGs from `extract_icon.py` so every slide carries the PDF's icon, then **look at a frame zoomed into the header** to confirm. Gate 2 fails a slide whose icon is still the template's, or is the wrong colour version for that page (dark on light pages, light on dark pages). Details: [references/header-icon.md](references/header-icon.md).
+- **The subtopic line is never touched.** Not its capitals, spelling, punctuation or wording: it stays exactly as the PDF has it, on every slide including the intro. The text rules skip it, and gate 2 fails if it differs from `course` in the spec (which is copied from the PDF as is).
+
+## Things the skill never changes
+- The subtopic line beside the header icon (verbatim).
+- The lesson topic's capitals: it stays in CAPITALS (only British spelling applies).
+- The publisher's logo, and the wording of the slides (the rules fix spelling, case and punctuation only; suspected mistakes in the source are flagged to the author, never silently changed).
+
 ## House text rules (applied automatically, checked at every gate)
 1. **British English.** Any American spelling is changed (organize, color, center, analyze, behavior, defense...). Words whose spelling depends on meaning (program/programme, license/licence, disk/disc, ton/tonne) are flagged for a person, not changed.
 2. **Sentence case, except the lesson topic.** Only the first letter of a sentence is a capital in headers, bullets, card titles, the course name and the outro line. **The lesson topic at the top of each slide, and the intro title, stay in CAPITALS** (British spelling only, no full stop); they are never converted to sentence case. Kept capitals: acronyms (NASA, UN, SMART), protected proper nouns (`text.proper_nouns` in the spec), words with an inner capital (pH, mRNA). The letter after a colon is lower case. The template may have all-caps switched on: gate 2 checks and can switch it off.
 3. **Every sentence is punctuated.** Bullets and headers end in a full stop (or `?`, `!`, or `:` when the line introduces a list); titles end with no full stop; spacing around punctuation is tidied.
-The rules never change wording. A suspected source mistake ("an ecologists") is flagged for the author. Details and how to extend the rules: [references/text-and-style.md](references/text-and-style.md).
+The rules never change wording, and they never touch the subtopic line. A suspected source mistake ("an ecologists") is flagged for the author. Details and how to extend the rules: [references/text-and-style.md](references/text-and-style.md).
 
 ## Quality gates (run them; do not wait for the user's QA)
 | Gate | When | What it catches | Command |
@@ -77,5 +91,6 @@ End with: slides built (page -> comp), text edits that need a human decision, te
 - [references/workflow.md](references/workflow.md): every step with commands, data shapes, rerun order.
 - [references/spec-format.md](references/spec-format.md): the `lesson.json` fields.
 - [references/text-and-style.md](references/text-and-style.md): text rules, pacing, hierarchy, highlights, colour.
+- [references/header-icon.md](references/header-icon.md): the lesson icon and the subtopic line.
 - [references/qa-gates.md](references/qa-gates.md): the three gates and the manual checklist.
-- [references/template-and-gotchas.md](references/template-and-gotchas.md): how the template is built, and the traps found on earlier lessons.
+- [references/template-and-gotchas.md](references/template-and-gotchas.md): how the template is built, and traps found on earlier lessons.

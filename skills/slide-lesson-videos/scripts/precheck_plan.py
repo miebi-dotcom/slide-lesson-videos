@@ -112,14 +112,14 @@ def main(argv):
             elif slot == str(sl.get("title", 24)):
                 kind = "topic"            # the lesson topic stays in capitals
             elif slot == str(sl.get("course", 26)):
-                kind = "title"
+                kind = "keep"             # the subtopic line is never touched
             else:
                 kind = "header" if slot == str(sl.get("header", 5)) else "bullet"
             flat = text.replace("\r", " ")
             fixed, ch = TR.fix(flat, kind, cfg)
             if fixed != flat:
                 E("%s slot %s breaks the text rules: %r -> %r" % (s["name"], slot, flat, fixed))
-            if slot != str(spec.get("slots", {}).get("course", 26)) and s["name"] not in ("S01 Intro", "S20 Thank you"):
+            if kind != "keep" and slot != str(spec.get("slots", {}).get("course", 26)) and s["name"] not in ("S01 Intro", "S20 Thank you"):
                 seen.setdefault(flat.lower(), []).append(s["name"])
     for t, names in seen.items():
         if len(names) > 1 and len(t) > 25:
@@ -143,6 +143,23 @@ def main(argv):
         long = [i for i in items if len(i) > 110]
         if long:
             W("%s: %d bullet(s) over 110 characters: hard to read in the time given" % (x["name"], len(long)))
+    # --- header icon (the small lesson icon beside the subtopic line) ---------------------------------------
+    icons = work + "icons/icons.json"
+    if not os.path.exists(icons):
+        E("no header icons: run extract_icon.py on the PDF into %sicons (the template's icon is a stand-in and must be replaced)" % work)
+    else:
+        ic = json.load(open(icons, encoding="utf-8"))
+        have = {int(k) for k in ic["pages"]}
+        need = {int(p) for p in spec["pages"]} | ({20} if spec.get("outro") is not None else set())
+        gone = sorted(need - have)
+        if gone:
+            W("no header icon found in the PDF for pages %s: look at those page renders" % gone)
+        for k, v in ic["pages"].items():
+            if v["kind"] == "vector":
+                W("page %s: the icon is vector art, not a picture: rebuild it from shape layers (see references/header-icon.md)" % k)
+                break
+        if len(ic["groups"]) > 2:
+            W("%d different icon pictures: expected one design in two colours; check the PDF renders" % len(ic["groups"]))
     tl = json.load(open(work + "timeline.json", encoding="utf-8"))
     for pg, t0, d in tl["timeline"]:
         if d > 25:

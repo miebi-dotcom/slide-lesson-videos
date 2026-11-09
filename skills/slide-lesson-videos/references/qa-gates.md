@@ -45,6 +45,8 @@ python K/precheck_ae.py _build/lesson.json _build/ae_dump.json --palette _build/
 | background stops early | rerun `fix_durations.jsx` |
 | background is not the planned one | `style_scenes.jsx` did not swap it; check `bgIds` |
 | scene starts or runs differently from the plan | rerun `build_scenes` / `place_wipes` |
+| header icon is still the template's stand-in / wrong icon for the page | run `header_icon.jsx` with the PNGs from `extract_icon.py` |
+| the subtopic line was changed | restore the PDF's exact text; the rules never touch it |
 | N scenes need N-1 wipes | rerun `place_wipes.jsx` |
 | music ends after the video | rerun `music.jsx` |
 
@@ -62,6 +64,7 @@ Render each batch with `qc_frames.jsx` (it writes PNGs named by time), then `pyt
 | after bullet 2 | highlights overlapping, highlight not on its own bullet, a bar left from the previous bullet |
 | all bullets in | overflow into the header line or card edge, bullets too close, uneven spacing, small text |
 | last moment before the wipe | title, icon, card or header already faded out, anything vanished early |
+| header (zoom in) | the icon is the lesson's own and level with the subtopic line; the subtopic line is untouched |
 | after each cut | wrong background colour, two colours on one slide, wipe not covering the old slide |
 
 Also look at: the intro (title fit, play button contrast), the outro, one frame from each video (is it frozen on the right frame, muted), and the music fades by checking the layer, not by ear.
@@ -72,6 +75,7 @@ Also look at: the intro (title fit, play button contrast), the outro, one frame 
 - [ ] Slides with the same layout look the same (card position, text size, spacing).
 - [ ] No slide shows two background colours, and none shows the template's navy.
 - [ ] Timing feels right: the reader finishes each bullet before the next arrives.
+- [ ] **Header icon** is the lesson's own (not the template's stand-in), on every slide, in the right colour for its background; **subtopic line** is exactly as in the PDF. Zoom into the header of a rendered frame to check.
 - [ ] Header icon, header line and play button match the PDF's look and contrast with their background.
 - [ ] Nothing was saved: confirm the project is untouched on disk.
 

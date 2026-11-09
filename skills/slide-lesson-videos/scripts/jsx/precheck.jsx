@@ -23,6 +23,7 @@ function sceneInfo(c) {
     for (var j = 1; j <= c.numLayers; j++) {
         var L = c.layer(j);
         if (L.name === "BG" && L.source) info.bg = L.source.name;
+        if (L.name === "Header Icon" || L.name === "Header Icon (PDF)") info.icon = { layer: L.name, source: (L.source ? L.source.name : ""), isPicture: !!(L.source && !(L.source instanceof CompItem)) };
         if (L.enabled && L.outPoint < c.duration - 0.05 && L.name !== "Header Line") info.early.push({ layer: L.name, outPoint: L.outPoint });
         scanExpr(L, c.name + "/" + L.name, info.exprErrors, 0);
         if (L.source instanceof CompItem) {

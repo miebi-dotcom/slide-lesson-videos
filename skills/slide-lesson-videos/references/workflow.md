@@ -21,6 +21,7 @@ All commands run from the lesson folder. `K` = `${CLAUDE_SKILL_DIR}/scripts`. `A
 ## Step 1: Read the PDF
 - `python K/extract_slides.py <pdf> _build/slides` -> `slides.md`, `slides.json`, `page_XX.png`.
 - `python K/pdf_palette.py <pdf> _build` -> `palette.json` (and a table). Check the card colours against the renders; a picture behind a card gives an average. Page contrast under 4.5 is flagged (large text passes at 3:1).
+- `python K/extract_icon.py <pdf> _build/icons` -> `icons/icon_pNN.png` (transparent) and `icons/icons.json`: the small lesson icon beside the subtopic line. Expect one design in two colours (dark on light pages, light on dark pages). Page 1 (the intro) usually has none. A vector icon is saved as a page crop: see references/header-icon.md.
 - Page 1 is normally the intro (lesson title), the last page the outro. A page with no body text, or numbered "01 02 03" cards, is a custom slide (below).
 
 ## Step 2-3: Spec, plan, gate 1
@@ -39,6 +40,7 @@ All commands run from the lesson folder. `K` = `${CLAUDE_SKILL_DIR}/scripts`. `A
 - Custom slides (`custom.json`): `build_custom.jsx` builds two-card or four-card slides from the base comp (cards rise 90 px, text rises 30 px with ease, a play-triangle bullet, a highlight wiping in). Colours come from `cardColor` / `customTextColor` in the spec, i.e. from the PDF.
 - Intro title clipped by the picture: `fix_intro.jsx` `{"scene":"S01 Intro","text":"...\r...","size":92}`; break the title over more lines before shrinking it.
 - A slide with a missing video that needs a picture: `fix_still.jsx` `{"scene": "S17 ...", "file": "<png>", "push": 0.07, "assetsFolder": "...", "holdersFolder": "..."}` (the picture from the PDF, in its own copy of the image comp).
+- `header_icon.jsx` with `header_icons.json` (written by `plan_lesson.py` once `icons/icons.json` exists): replaces the template's stand-in icon on every slide with the PDF's own, same place and size, named `Header Icon (PDF)`. **Always run it, then zoom into the header of a rendered frame** (references/header-icon.md).
 - `fix_durations.jsx` with `durations.json`: lengthens custom comps and extends every scene's background (and any layer still ending at the template's 15 s) to the comp end. **Run after any change of slide length.**
 - `fix_highlights.jsx` with `highlights.json`: every highlight bar starts from one 840 x 73 shape, takes its height from the measured text, and fades out before the next bar starts. Bars are full width with 40 px padding: the user rejected bars hugging the text.
 - `fix_textcolor.jsx` with `colors.json`: text, header and arrows take the PDF colour.
@@ -58,8 +60,11 @@ python K/qc_times.py _build/lesson.json _build/qc.json
 ```
 Fix every error, rerun `precheck.jsx`, repeat until clean. Then run `qc_frames.jsx` once per batch in `qc.json` (`compId`, `times`, `outDir`, `prefix`) and tile each batch with `python K/qc/contact_sheet.py <out.png> <frames...> --cols 4`. Look at every sheet (references/qa-gates.md lists what to look for).
 
+## Step 7b: last look at the header
+Render one frame of a light slide, a dark slide and the outro, crop the header (top left, the icon and the subtopic line) and enlarge it. Check: the icon is the lesson's own (compare with the PDF page render), it sits level with the subtopic text and is neither tiny nor blurry, it is the right colour for its background, and the subtopic line reads exactly as the PDF has it.
+
 ## Rerun order
-`plan_lesson` -> (`setup_bg`) -> `build_scenes` -> `style_scenes` -> `build_custom` -> `fix_still` / `fix_intro` -> `fix_durations` -> `fix_highlights` -> `fix_textcolor` -> `nofade` -> (`staticline`, `headericon`, `playbtn`) -> `place_wipes` -> `music` -> gate 2 -> gate 3.
+`extract_icon` -> `plan_lesson` -> (`setup_bg`) -> `build_scenes` -> `style_scenes` -> `build_custom` -> `fix_still` / `fix_intro` -> `header_icon` -> `fix_durations` -> `fix_highlights` -> `fix_textcolor` -> `nofade` -> (`staticline`, `headericon`, `playbtn`) -> `place_wipes` -> `music` -> gate 2 -> gate 3.
 `build_scenes` and `build_custom` replace by scene name, which discards styling on those scenes: after rebuilding a scene, rerun everything from `style_scenes` down for it. `place_wipes` removes and rebuilds all wipes, so it is always safe to rerun and must be rerun after any start or length change.
 
 ## Covering template gaps

@@ -26,7 +26,9 @@ def kind_of(layer):
         return None
     if layer in ("Title", "Lesson Title"):
         return "topic"                       # the lesson topic stays in capitals
-    if layer in ("Course Name", "Thank You") or layer.endswith(" Title"):
+    if layer == "Course Name":
+        return "keep"                        # the subtopic line is never touched
+    if layer == "Thank You" or layer.endswith(" Title"):
         return "title"
     if "Header" in layer:
         return "header"
@@ -71,6 +73,13 @@ def main(argv):
     cfg = dict(spec.get("text", {}))
     cfg["acronyms"] = sorted(set(cfg.get("acronyms", [])) | set(TR.learn_acronyms([x.replace("\r", " ") for x in allscene_text])))
     bgnames = spec.get("bgNames", {})
+    icon_file = {}
+    hi = work + "header_icons.json"
+    if os.path.exists(hi):
+        for x in json.load(open(hi, encoding="utf-8"))["scenes"]:
+            icon_file[x["name"][:3]] = os.path.basename(x["file"])
+    else:
+        W("header_icons.json is missing: the header icon cannot be checked against the PDF (run extract_icon.py, then plan_lesson.py)")
     pages_bg = {int(k): v.get("bg") for k, v in spec["pages"].items()}
 
     for s in dump["scenes"]:
@@ -85,6 +94,10 @@ def main(argv):
                 continue
             k = kind_of(t["layer"])
             tag = "%s / %s" % (nm, t["layer"])
+            if k == "keep":
+                if txt != spec.get("course", "").strip():
+                    E("%s: the subtopic line was changed: %r, the PDF has %r (it must stay exactly as the PDF has it)" % (tag, txt, spec.get("course")))
+                continue
             if k:
                 fixed, ch = TR.fix(txt, k, cfg)
                 if fixed != txt:
@@ -112,6 +125,15 @@ def main(argv):
                         E("%s: text contrast %.1f against %s is under 3:1" % (tag, c, ref))
         if s["bg"] and bgnames.get(pages_bg.get(page)) and s["bg"] != bgnames[pages_bg[page]]:
             E("%s: background is '%s', the plan says '%s'" % (nm, s["bg"], bgnames[pages_bg[page]]))
+        if nm[:3] != "S01":
+            ic = s.get("icon")
+            want = icon_file.get(nm[:3])
+            if not ic:
+                W("%s: no header icon layer" % nm)
+            elif ic["layer"] != "Header Icon (PDF)" or not ic["isPicture"]:
+                E("%s: the header icon is still the template's stand-in: run header_icon.jsx with the icon from the PDF" % nm)
+            elif want and ic["source"] != want:
+                E("%s: header icon is %s, the PDF page uses %s" % (nm, ic["source"], want))
         for e in s["early"]:
             if e["layer"] == "BG":
                 E("%s: background stops at %.1f s but the comp runs to %.1f s: the template colour will show" % (nm, e["outPoint"], s["duration"]))

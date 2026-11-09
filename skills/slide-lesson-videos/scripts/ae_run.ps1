@@ -50,6 +50,10 @@ if ($DataFile) {
     if (-not $data) { $data = "{}" }
 }
 
+# Several lessons are often open on one machine over a working day. A data file that names its project ("project": "<file>.aep")
+# is only ever run on that project: a script that writes (text, colours, layers) must never land in somebody else's lesson.
+if (-not $Project -and $data -match '"project"\s*:\s*"([^"]+)"') { $Project = $Matches[1] }
+
 $outDir = Join-Path $env:TEMP "ae_skill"
 New-Item -ItemType Directory -Force $outDir | Out-Null
 $stamp = (Get-Date -Format "HHmmssfff") + "_" + (Get-Random -Maximum 9999)
@@ -60,7 +64,9 @@ $tmpJsx = Join-Path $outDir "$name`_$stamp.jsx"
 $lib = Get-Content (Join-Path $here "jsx/lib.jsx") -Raw -Encoding UTF8
 $lib = $lib.Replace("__RESULT_PATH__", $resultPath).Replace("__DATA__", $data)
 $libLines = ($lib -split "`n").Count + 1
-$full = $lib + "`n(function(){`ntry {`n" + $body + "`n} catch (e) { R.errors.push(e.toString() + "" (line "" + (e.line - $libLines - 2) + "" of $name.jsx)""); }`nwriteResult();`n})();`n"
+$guard = ""
+if ($Project) { $guard = "if (app.project.file && app.project.file.name.toLowerCase().indexOf(" + ('"' + $Project.ToLower().Replace('\', '/') + '"') + ") < 0) throw new Error('wrong project open: ' + app.project.file.name);`n" }
+$full = $lib + "`n(function(){`ntry {`n" + $guard + $body + "`n} catch (e) { R.errors.push(e.toString() + "" (line "" + (e.line - $libLines - 2) + "" of $name.jsx)""); }`nwriteResult();`n})();`n"
 [IO.File]::WriteAllText($tmpJsx, $full, (New-Object Text.UTF8Encoding($false)))
 
 # Syntax-check before sending: a parse error inside AE opens a blocking dialog.
@@ -79,7 +85,13 @@ if ($node) {
 # Pick the right After Effects when several are open (e.g. 2025 with the lesson + 2026 untitled):
 # -Project filter > a window with a saved .aep (not Untitled) > any window.
 $wins = @(Get-Process -Name AfterFX -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle })
-if ($Project) { $proc = $wins | Where-Object { $_.MainWindowTitle -like "*$Project*" } | Select-Object -First 1 }
+if ($Project) {
+    $proc = $wins | Where-Object { $_.MainWindowTitle -like "*$Project*" } | Select-Object -First 1
+    if (-not $proc) {
+        Write-Output ("ERROR: this data is for project '" + $Project + "' but After Effects has: " + (($wins | ForEach-Object { $_.MainWindowTitle }) -join " || ") + ". Nothing was run. Open the right project (or fix the project name in the data file) and run again.")
+        exit 1
+    }
+}
 if (-not $proc) { $proc = $wins | Where-Object { $_.MainWindowTitle -match '\.aep' -and $_.MainWindowTitle -notmatch 'Untitled' } | Select-Object -First 1 }
 if (-not $proc) { $proc = $wins | Select-Object -First 1 }
 if (-not $proc) { Write-Output "ERROR: After Effects is not running (no AfterFX window found). Open the project first."; exit 1 }

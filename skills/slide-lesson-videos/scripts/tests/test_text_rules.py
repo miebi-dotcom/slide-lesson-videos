@@ -34,6 +34,10 @@ class Rules(unittest.TestCase):
         self.assertEqual(self.f("Colour and organize.", "topic"), "COLOUR AND ORGANISE")
         self.assertEqual(self.f("SUMMARY", "topic"), "SUMMARY")
 
+    def test_subtopic_line_is_never_touched(self):
+        for t in ("Introduction to Sustainable Gardening", "ORGANIZE color Center", "no full stop"):
+            self.assertEqual(T.fix(t, "keep", CFG), (t, []))
+
     def test_one_word_title(self):
         self.assertEqual(self.f("SUMMARY", "title"), "Summary")
         self.assertEqual(self.f("NASA", "title"), "NASA")

@@ -8,7 +8,7 @@ Writes  (into spec["work"]):
     style.json        for style_scenes.jsx (bullets, backgrounds, card fills, video slot)
     colors.json       for fix_textcolor.jsx
     custom.json       for build_custom.jsx (slides with no picture slot) and fix_durations.jsx
-    highlights.json   for fix_highlights.jsx;  durations.json for fix_durations.jsx;  music.json for music.jsx;  wipes.json for place_wipes.jsx
+    header_icons.json for header_icon.jsx (needs <work>/icons/icons.json from extract_icon.py);  highlights.json for fix_highlights.jsx;  durations.json for fix_durations.jsx;  music.json for music.jsx;  wipes.json for place_wipes.jsx
     timeline.json     page, start, length for every slide, and the outro start
     text_changes.md   every edit the text rules made, for a human to review (proper nouns, quotations)
 
@@ -77,7 +77,7 @@ class Plan:
             if p.get("cards"):
                 q["cards"] = self._custom_cards(n, p)
             self.pages[n] = q
-        self.course = self._fix(0, "course", self.spec.get("course", ""), "title")
+        self.course = self.spec.get("course", "")      # the subtopic line is never touched: verbatim from the PDF
         intro = self.spec.get("intro")
         self.intro_title = self._fix_broken(intro.get("title", ""), "intro title") if intro else ""
         outro = self.spec.get("outro")
@@ -235,6 +235,8 @@ class Plan:
         scenes, style, colors, custom, timeline, out_t = self.build(only)
 
         def j(name, obj):
+            if spec.get("project") and isinstance(obj, dict):
+                obj = dict({"project": spec["project"]}, **obj)   # the runner refuses to run this on any other open project
             json.dump(obj, open(work + name, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
         folder = spec.get("scenesFolder", spec["code"] + " scenes")
         j("scenes.json", {"mainId": spec["mainId"], "scenesFolder": folder,
@@ -245,13 +247,26 @@ class Plan:
         j("colors.json", {"palette": spec.get("textColors", {}), "scenes": colors})
         j("custom.json", {"mainId": spec["mainId"], "course": self.course, "bgIds": spec.get("bgIds", {}),
                           "baseId": spec.get("customBaseId"), "scenesFolder": folder, "cardColor": spec.get("cardColor"),
-                          "textColor": spec.get("customTextColor"), "slides": custom})
+                          "textColor": (spec.get("textColors", {}).get(spec.get("customTextColor"), spec.get("customTextColor"))
+                                        if isinstance(spec.get("customTextColor"), str) else spec.get("customTextColor")),
+                          "slides": custom})
         n_of = {x["name"]: len(x["items"]) for x in style if x.get("items")}
         j("highlights.json", {"scenes": [{"name": k, "n": v} for k, v in n_of.items()]})
         j("durations.json", {"mainId": spec["mainId"], "custom": [{"name": c["name"], "D": c["D"]} for c in custom]})
         j("music.json", {"mainId": spec["mainId"], "audioPrefix": spec.get("audioPrefix", ""), "fadeIn": spec.get("musicFadeIn", 2.5),
                          "fadeOut": spec.get("musicFadeOut", 5)})
         j("wipes.json", {"mainId": spec["mainId"], "bandId": spec.get("wipe", {}).get("bandId"), "matteId": spec.get("wipe", {}).get("matteId")})
+        icons_json = work + "icons/icons.json"
+        icon_scenes = []
+        if os.path.exists(icons_json):
+            ic = json.load(open(icons_json, encoding="utf-8"))["pages"]
+            for pg, t0, d in timeline:
+                if str(pg) in ic:
+                    p = self.pages[pg]
+                    icon_scenes.append({"name": "S%02d %s" % (pg, p["title"].rstrip("?.").title()[:34]), "file": ic[str(pg)]["file"]})
+            if "20" in ic and spec.get("outro") is not None:
+                icon_scenes.append({"name": "S20 Thank you", "file": ic["20"]["file"]})
+        j("header_icons.json", {"assetsFolder": spec.get("assetsFolder", spec["code"] + " assets"), "scenes": icon_scenes})
         j("timeline.json", {"timeline": timeline, "outT": out_t, "total": round(out_t + OUTRO_LEN, 2)})
         md = ["# Text edits made by the text rules", "", "Review these: proper nouns and quotations are the usual mistakes.", ""]
         for pg, label, c in self.changes:
