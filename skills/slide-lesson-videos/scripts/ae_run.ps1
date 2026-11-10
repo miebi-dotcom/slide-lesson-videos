@@ -65,7 +65,7 @@ $lib = Get-Content (Join-Path $here "jsx/lib.jsx") -Raw -Encoding UTF8
 $lib = $lib.Replace("__RESULT_PATH__", $resultPath).Replace("__DATA__", $data)
 $libLines = ($lib -split "`n").Count + 1
 $guard = ""
-if ($Project) { $guard = "if (app.project.file && app.project.file.name.toLowerCase().indexOf(" + ('"' + $Project.ToLower().Replace('\', '/') + '"') + ") < 0) throw new Error('wrong project open: ' + app.project.file.name);`n" }
+if ($Project) { $guard = "if (app.project.file && decodeURIComponent(app.project.file.name).toLowerCase().indexOf(" + ('"' + $Project.ToLower().Replace('\', '/') + '"') + ") < 0) throw new Error('wrong project open: ' + app.project.file.name);`n" }
 $full = $lib + "`n(function(){`ntry {`n" + $guard + $body + "`n} catch (e) { R.errors.push(e.toString() + "" (line "" + (e.line - $libLines - 2) + "" of $name.jsx)""); }`nwriteResult();`n})();`n"
 [IO.File]::WriteAllText($tmpJsx, $full, (New-Object Text.UTF8Encoding($false)))
 

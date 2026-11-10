@@ -172,7 +172,7 @@ def main(argv):
         if spec.get("audioPrefix"):
             a = m["audio"]
             if not a:
-                W("no music layer named '%s' in the main comp" % spec["audioPrefix"])
+                E("no music layer named '%s' in the main comp (run music.jsx: the music is always added)" % spec["audioPrefix"])
             else:
                 if abs(a["outPoint"] - m["duration"]) > 0.1:
                     E("music ends at %.1f s but the video ends at %.1f s (run music.jsx)" % (a["outPoint"], m["duration"]))

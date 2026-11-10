@@ -112,7 +112,7 @@ def main(argv):
                     kind = "keep"             # the subtopic line is never touched
                 else:
                     kind = "title"
-            elif s["name"] == "S20 Thank you":
+            elif s["name"].endswith(" Thank you"):
                 kind = "title"
             elif slot == str(sl.get("title", 24)):
                 kind = "topic"            # the lesson topic stays in capitals
@@ -124,7 +124,7 @@ def main(argv):
             fixed, ch = TR.fix(flat, kind, cfg)
             if fixed != flat:
                 E("%s slot %s breaks the text rules: %r -> %r" % (s["name"], slot, flat, fixed))
-            if kind != "keep" and slot != str(spec.get("slots", {}).get("course", 26)) and s["name"] not in ("S01 Intro", "S20 Thank you"):
+            if kind != "keep" and slot != str(spec.get("slots", {}).get("course", 26)) and s["name"] != "S01 Intro" and not s["name"].endswith(" Thank you"):
                 seen.setdefault(flat.lower(), []).append(s["name"])
     for t, names in seen.items():
         if len(names) > 1 and len(t) > 25:

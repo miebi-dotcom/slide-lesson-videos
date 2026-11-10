@@ -51,7 +51,7 @@ All commands run from the lesson folder. `K` = `${CLAUDE_SKILL_DIR}/scripts`. `A
 
 ## Step 6: Wipes and music
 - `place_wipes.jsx` with `wipes.json`: one wipe per cut, stacked as the template's demo comp does (band, matte hidden, incoming slide with an alpha matte; the outgoing slide runs 1.1 s past the next start). Needs `spec.wipe.bandId` and `matteId` (probe: `transitionComps`).
-- `music.jsx` with `music.json`: fades in 2.5 s, out over the last 5 s, level at 0 dB, cut at the video end. The music layer must already be in the main comp (the user adds it). If the track is longer than the video it is trimmed, not stretched.
+- `music.jsx` with `music.json`: fades in 2.5 s, out over the last 5 s, level at 0 dB, cut at the video end. If the music layer is not in the main comp yet, the script imports `audioFile` and adds it at the bottom, so the music is always added by the skill. If the track is longer than the video it is trimmed, not stretched; the slides are never timed to the music.
 
 ## Step 7: Gates 2 and 3
 ```

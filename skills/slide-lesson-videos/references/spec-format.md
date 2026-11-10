@@ -19,7 +19,8 @@
 | `boldFont` | Font used for the bold lead-in ("Term:") of a bullet |
 | `customBaseId` | Template comp copied to make custom slides |
 | `wipe` | `{"bandId", "matteId"}` of the template's wipe comps |
-| `audioPrefix` | Start of the music layer's name in the main comp |
+| `audioFile` | Full path of the background music file; `music.jsx` imports it and adds it to the main comp. Always set |
+| `audioPrefix` | Start of the music layer's name in the main comp (the file name) |
 | `text` | `proper_nouns` (phrases that keep their capitals), `acronyms` (extra ones; others are learned), `keep_spelling` (words to leave alone), `cap_after_colon` (default false) |
 | `pacing` | Optional overrides: `first` 2.6, `gap_min` 2.0, `gap_max` 3.6, `per_word` 0.2, `hold_min` 4.0, `hold_per_word` 0.1, `slide_min` 11 |
 | `custom` | Page -> length in seconds for custom slides; `null` works the length out from the card timings |

@@ -77,6 +77,7 @@ class Plan:
             if p.get("cards"):
                 q["cards"] = self._custom_cards(n, p)
             self.pages[n] = q
+        self.outro_page = max([int(k) for k in self.spec["pages"]] + [1]) + 1   # outro is the page after the last slide
         self.course = self.spec.get("course", "")      # the subtopic line is never touched: verbatim from the PDF
         intro = self.spec.get("intro")
         self.intro_title = self._fix_broken(intro.get("title", ""), "intro title") if intro else ""
@@ -223,9 +224,9 @@ class Plan:
             style.append({"name": "S01 Intro", "page": 1, "bg": intro.get("bg"), "intro": True, "video": bool(intro.get("video")), "t": 0, "D": INTRO_LEN})
         outro = spec.get("outro")
         if outro is not None and (not only or 20 in only):
-            scenes.append({"name": "S20 Thank you", "preset": spec["presets"]["outro"], "t": round(out_t, 2), "D": OUTRO_LEN,
+            scenes.append({"name": "S%02d Thank you" % self.outro_page, "preset": spec["presets"]["outro"], "t": round(out_t, 2), "D": OUTRO_LEN,
                            "texts": {str(slots["outro"]["title"]): self.outro_title}, "fit": {"mode": "extend"}})
-            style.append({"name": "S20 Thank you", "page": 20, "bg": outro.get("bg"), "outro": True, "video": False, "t": round(out_t, 2), "D": OUTRO_LEN})
+            style.append({"name": "S%02d Thank you" % self.outro_page, "page": self.outro_page, "bg": outro.get("bg"), "outro": True, "video": False, "t": round(out_t, 2), "D": OUTRO_LEN})
         return scenes, style, colors, custom, timeline, out_t
 
     def write(self, only=None):
@@ -253,7 +254,7 @@ class Plan:
         n_of = {x["name"]: len(x["items"]) for x in style if x.get("items")}
         j("highlights.json", {"scenes": [{"name": k, "n": v} for k, v in n_of.items()]})
         j("durations.json", {"mainId": spec["mainId"], "custom": [{"name": c["name"], "D": c["D"]} for c in custom]})
-        j("music.json", {"mainId": spec["mainId"], "audioPrefix": spec.get("audioPrefix", ""), "fadeIn": spec.get("musicFadeIn", 2.5),
+        j("music.json", {"mainId": spec["mainId"], "audioFile": spec.get("audioFile", ""), "audioPrefix": spec.get("audioPrefix", ""), "fadeIn": spec.get("musicFadeIn", 2.5),
                          "fadeOut": spec.get("musicFadeOut", 5)})
         j("wipes.json", {"mainId": spec["mainId"], "bandId": spec.get("wipe", {}).get("bandId"), "matteId": spec.get("wipe", {}).get("matteId")})
         icons_json = work + "icons/icons.json"
@@ -264,8 +265,8 @@ class Plan:
                 if str(pg) in ic:
                     p = self.pages[pg]
                     icon_scenes.append({"name": "S%02d %s" % (pg, p["title"].rstrip("?.").title()[:34]), "file": ic[str(pg)]["file"]})
-            if "20" in ic and spec.get("outro") is not None:
-                icon_scenes.append({"name": "S20 Thank you", "file": ic["20"]["file"]})
+            if str(self.outro_page) in ic and spec.get("outro") is not None:
+                icon_scenes.append({"name": "S%02d Thank you" % self.outro_page, "file": ic[str(self.outro_page)]["file"]})
         j("header_icons.json", {"assetsFolder": spec.get("assetsFolder", spec["code"] + " assets"), "scenes": icon_scenes})
         j("timeline.json", {"timeline": timeline, "outT": out_t, "total": round(out_t + OUTRO_LEN, 2)})
         md = ["# Text edits made by the text rules", "", "Review these: proper nouns and quotations are the usual mistakes.", ""]

@@ -56,7 +56,7 @@ Per cut, top to bottom in the main comp: wipe band, wipe matte (hidden), the inc
 - Footage placeholders in image comps are not always FileSource: match any non-text source layer.
 
 ## Traps: process
-- **Audio**: ask what the file is before using it. Music is a bed; do not transcribe it (Whisper invents sentences from music).
+- **Audio**: always add the background music (`music.jsx`). It is a bed; do not transcribe or beat-match it (Whisper invents sentences from music) and do not time slides to it. A track far longer than the video is trimmed.
 - **Pacing**: with no narration the reading time sets every length. A fixed 15 s per slide looks wrong at both ends.
 - **One decision at a time**: one lesson used red as a video-wide background. That was that lesson's decision; this skill reads colours from the PDF each time.
 - **Repeat checks on later frames**: highlights fine at the settled moment but wrong at the start, or text fading at the very end, were found only on screenshots from later times.

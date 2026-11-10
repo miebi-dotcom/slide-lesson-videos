@@ -38,7 +38,7 @@ Full commands, data shapes and the rerun order are in [references/workflow.md](r
 
 ### Step 0-1: inputs and colours
 1. List the lesson folder. Match each video to its slide by the number in its file name, then by title words; list anything unmatched and ask. Do not take pictures from the PDF when the animator supplied videos (one exception: a slide with no video, see workflow.md).
-2. **Ask what the audio file is** before doing anything with it. On an earlier lesson the file was soft background music; transcribing it produced invented speech and wasted a long detour. Music is a bed (fade in/out); narration would be a different job.
+2. **Background music is always part of the build.** The animator supplies a music file (often several lengths: pick the one the user names, and ask if unclear). Set `audioFile` (full path) and `audioPrefix` (start of the file name) in `lesson.json`; `music.jsx` imports it, puts it at the bottom of the main comp, fades it in and out and trims it to the video. Never finish a build without the music layer. The music is only a bed: **do not analyse, transcribe or beat-match it, and do not time slides to it.** Slides are paced by reading time. Tracks are usually much longer than the video; trimming is correct. Only if the user says a file is narration is it a different job.
 3. `python ${CLAUDE_SKILL_DIR}/scripts/extract_slides.py <pdf> _build/slides` then read `slides.md` and look at `page_XX.png`. Exports drop letters ("a ected" for "affected"): fix them against the renders.
 4. `python ${CLAUDE_SKILL_DIR}/scripts/pdf_palette.py <pdf> _build` gives each page's background, card fill and text colour. **Colours come from the PDF, never from the template and never from memory.** Pages alternate between two or three backgrounds; the template may have a comp for only some of them (build the missing ones with `setup_bg.jsx`).
 5. `python ${CLAUDE_SKILL_DIR}/scripts/extract_icon.py <pdf> _build/icons` saves the **lesson icon** from the PDF: the small icon beside the subtopic line in the header (top left, not the publisher's logo at top right). Every lesson has its own, and the template only carries a stand-in, so it must be replaced on every build (see "Header icon and subtopic line" below).
@@ -92,7 +92,7 @@ Gate 2 must be run again after *any* fix and after any change of slide length. G
 - A fade that "feels right" in the template (every element fades 0.6 s before the wipe) makes titles and icons vanish early here: `nofade.jsx` removes it.
 
 ## Report
-End with: slides built (page -> comp), text edits that need a human decision, template gaps and how each was covered, gate results (errors fixed, warnings left and why), what the user still has to do (add the narration or audio; any slide with a missing video; anything flagged in the source text), and that the project is **not saved**.
+End with: slides built (page -> comp), text edits that need a human decision, template gaps and how each was covered, gate results (errors fixed, warnings left and why), what the user still has to do (add narration if it is wanted; any slide with a missing video; anything flagged in the source text), and that the project is **not saved**.
 
 ## References
 - [references/workflow.md](references/workflow.md): every step with commands, data shapes, rerun order.
